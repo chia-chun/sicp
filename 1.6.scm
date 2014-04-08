@@ -27,7 +27,7 @@
   (< (abs (- (square guess) x)) 0.001))
 
 (define (abs x)
-  (if (< x 0) (- x) x)
+  (if (< x 0) (- x) x))
 
 (define (sqrt x)
   (sqrt-iter 1.0 x))

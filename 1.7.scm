@@ -14,10 +14,10 @@
   (/ (+ x y) 2))
 
 (define (good-enough? guess x)
-  (< (abs (/ (- guess (improve guess)) guess) 0.001)))
+  (< (abs (/ (- guess (improve guess x)) guess)) 0.001))
 
 (define (abs x)
-  (if (< x 0) (- x) x)
+  (if (< x 0) (- x) x))
 
 (define (sqrt x)
   (sqrt-iter 1.0 x))

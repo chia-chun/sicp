@@ -11,10 +11,10 @@
   (/ (+ (/ x (* guess guess)) (* guess 2)) 3))
 
 (define (good-enough? guess x)
-  (< (abs (/ (- guess (improve guess)) guess) 0.001)))
+  (< (abs (/ (- guess (improve guess x)) guess)) 0.001))
 
 (define (abs x)
-  (if (< x 0) (- x) x)
+  (if (< x 0) (- x) x))
 
 (define (cubert x)
   (cubert-iter 1.0 x))
