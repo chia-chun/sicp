@@ -1,10 +1,8 @@
 (define (* a b)
-  (*-iter a b 0))
-
-(define (*-iter a b answer)
-  (cond ((= b 0) answer)
-        ((= (remainder b 2) 1) (*-iter a (- b 1) (+ answer a)))
-        (else (*-iter (double a) (halve b) answer))))
+  (cond ((= b 0) 0)
+        ((= b 1) a)
+        ((= (remainder b 2) 0) (* (double a) (halve b)))
+        (else (+ a (* a (- b 1))))))
 
 (define (double x)
   (+ x x))
