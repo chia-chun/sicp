@@ -13,17 +13,24 @@
   (= n (smallest-divisor n)))
 
 (define (runtime)
-  (tms:clock(times)))
+  (+ (* 1000000 (car (gettimeofday))) (cdr (gettimeofday))))
 
 (define (timed-prime-test n)
-  (newline)
-  (display n)
   (start-prime-test n (runtime)))
 
 (define (start-prime-test n start-time)
   (if (prime? n)
-      (report-prime (- (runtime) start-time))))
+      (report-prime n (- (runtime) start-time))))
 
-(define (report-prime elapsed-time)
+(define (report-prime n  elapsed-time)
+  (newline)
+  (display n)
   (display "***")
   (display elapsed-time))
+
+(define (search-for-primes a b)
+  (cond ((< b a) (newline) (display "End") (newline))
+        ((= b a) (timed-prime-test a))
+        ((= (remainder a 2) 0) (search-for-primes (+ 1 a) b))
+        (else (timed-prime-test a)
+              (search-for-primes (+ 2 a) b))))
