@@ -15,6 +15,11 @@
      (= (expmod a n n) a))
   (try-it (+ 1 (random (- n 1)))))
 
+(define (fast-prime? n times)
+  (cond ((= times 0) #t)
+        ((fermat-test n) (fast-prime? n (- times 1)))
+        (else #f)))
+
 (define (runtime)
   (+ (* 1000000 (car (gettimeofday))) (cdr (gettimeofday))))
 
