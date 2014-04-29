@@ -7,18 +7,16 @@
 (define (cube x)
   (* x x x))
 
-(define (intergral f a b dx)
+(define (integral f a b dx)
   (define (add-dx x) (+ x dx))
   (* (sum f (+ a (/ dx 2.0)) add-dx b) dx))
 
-(define (s-intergral f a b n);Integral computed using Simpson's Rule
+(define (s-integral f a b n);Integral computed using Simpson's Rule
+  (define h (/ (- b a) n))
   (define (next-2 x)
-     (+ x (/ (- b a) n 0.5)))
-  (/ (*
-      (- b a)
-      (+ (f a)
-         (f b)
-         (* 4 (sum f (+ a (/ (- b a) n)) next-2 (- b (/ (- b a) n))))
-         (* 2 (sum f (+ a (/ (- b a) n 0.5)) next-2 (- b (/ (- b a) n 0.5))))))
-     3
-     n))
+     (+ x (* 2 h)))
+  (* (/ h 3)
+     (+ (f a)
+        (f b)
+        (* 4 (sum f (+ a h) next-2 (- b h)))
+        (* 2 (sum f (+ a (* 2 h)) next-2 (- b (* 2 h)))))))
