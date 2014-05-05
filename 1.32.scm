@@ -6,9 +6,9 @@
 
 (define (accumulate-iter combiner null-value term a next b)
   (define (iter a result)
-     (if (> a b)
+     (if (> x b)
          result
-         (iter (next a) (combiner (term a) result))))
+         (iter (next x) (combiner (term x) result))))
   (iter a null-value))
 
 (define (sum term a next b)
