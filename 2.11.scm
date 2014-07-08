@@ -68,7 +68,7 @@
               (>=  (lower-bound y) 0)
               (>= (lower-bound y) 0))
          (make-interval (* (lower-bound x) (lower-bound y))
-                        (* (upper-bound x) (upper-bound y)))))
+                        (* (upper-bound x) (upper-bound y))))))
 
 (define (>= x y)
   (or (> x y) (= x y)))
