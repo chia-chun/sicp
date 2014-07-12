@@ -1,0 +1,8 @@
+(define (same-parity x . y)
+  (define (parity-test list)
+    (if (null? list)
+        '()
+        (if (= (remainder (car list) 2) (remainder x 2))
+            (cons (car list) (parity-test (cdr list)))
+            (parity-test (cdr list)))))
+  (cons x (parity-test y)))
