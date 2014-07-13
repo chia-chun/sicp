@@ -1,0 +1,44 @@
+   +---+---+  +---+---+
+   | * | *-+->| * | / |
+   +-+-+---+  +-+-+---+
+     |          |
+     V          V
+   +---+      +---+---+  +---+---+
+   | 1 |      | * | *-+->| * | / |
+   +---+      +-+-+---+  +---+---+
+                |          |
+                V          V
+              +---+      +---+---+  +---+---+
+              | 2 |      | * | *-+->| * | / |
+              +---+      +-+-+---+  +-+-+---+
+                           |          |
+                           V          V
+                         +---+      +---+
+                         | 3 |      | 4 |
+                         +---+      +---+
+
+ (1 (2 (3 4)))
+      ^
+    /   \
+   1     ^ (2 (3 4))
+       /   \
+      2     ^ (3 4)
+          /   \
+         3     4
+
+scheme@(guile-user)> (cons 1 (cons 2 3))
+(1 2 . 3)
+scheme@(guile-user)> (cons 1 (list 2 3))
+(1 2 3)
+scheme@(guile-user)> (list 1 (list 2 3))
+(1 (2 3))
+scheme@(guile-user)> (list 1 (cons 2 3))
+(1 (2 . 3))
+scheme@(guile-user)> (cdr (cons 1 (cons 2 3)))
+(2 . 3)
+scheme@(guile-user)> (cdr (list 1 (list 2 3)))
+((2 3))
+scheme@(guile-user)> (cdr (cons 1 (list 2 3)))
+(2 3)
+scheme@(guile-user)> (cdr (list 1 (cons 2 3)))
+((2 . 3))
