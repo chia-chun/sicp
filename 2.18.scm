@@ -1,7 +1,7 @@
-(define (reverse list)
-  (if (null? list)
-      list
-      (append (reverse (cdr list)) (car list))))
+(define (reverse items)
+  (if (null? items)
+      items
+      (append (reverse (cdr items)) (list (car items)))))
 
 (define (append list1 list2)
   (if (null? list1)
