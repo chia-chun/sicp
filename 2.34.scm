@@ -3,3 +3,9 @@
                       (+ this-coeff (* x higher-terms)))
               0
               coefficient-sequence))
+
+(define (accumulate op initial sequence)
+  (if (null? sequence)
+      initial
+      (op (car sequence)
+          (accumulate op initial (cdr sequence)))))
