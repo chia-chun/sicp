@@ -26,7 +26,11 @@
           ((= (get k positions) (car positions)) #f)
           (else (row-safe? (- k 1) (cdr positions)))))
   (define (diagonal-safe? k positions)
-    #t)
+    (if (= k 1)
+        #t
+        (not (= (- k 1) (- (get k positions) (car positions)))
+             (= (+ (get k positions) (car positions)) (+ k 1))
+             (diagonal-safe? (- k 1) (cdr positions)))))
   (and (row-safe? k positions) (diagonal-safe? k positions)))
 
 (define (adjoin-position new-row k rest-of-queens)
