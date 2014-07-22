@@ -34,7 +34,7 @@
   (and (row-safe? k positions) (diagonal-safe? k positions)))
 
 (define (adjoin-position new-row k rest-of-queens)
-  (append rest-of-queens new-row))
+  (append rest-of-queens (list new-row)))
 
 (define empty-board '())
 
