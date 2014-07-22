@@ -20,7 +20,7 @@
   (define (get kth positions)
     (if (= kth 1)
         (car positions)
-        (get (- target 1) (cdr positions))))
+        (get (- kth 1) (cdr positions))))
   (define (row-safe? k positions)
     (cond ((= k 1) #t)
           ((= (get k positions) (car positions)) #f)
@@ -28,13 +28,13 @@
   (define (diagonal-safe? k positions)
     (if (= k 1)
         #t
-        (not (= (- k 1) (- (get k positions) (car positions)))
-             (= (+ (get k positions) (car positions)) (+ k 1))
-             (diagonal-safe? (- k 1) (cdr positions)))))
+        (not (or (= (- k 1) (- (get k positions) (car positions)))
+                 (= (+ (get k positions) (car positions)) (+ k 1))
+                 (diagonal-safe? (- k 1) (cdr positions))))))
   (and (row-safe? k positions) (diagonal-safe? k positions)))
 
 (define (adjoin-position new-row k rest-of-queens)
-  (append rest-of-queens new-row)
+  (append rest-of-queens new-row))
 
 (define empty-board '())
 
