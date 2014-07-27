@@ -1,6 +1,7 @@
 ;; The original code is from:
 ;; https://github.com/hudayou/sicp/blob/master/picture.scm
 ;; This picture-language is based on gnuplot.
+;; Revision: up-split
 
 (define (flipped-pairs painter)
   (let ((painter2 (beside painter (flip-vert painter))))
@@ -32,7 +33,7 @@
   (if (= n 0)
     painter
     (let ((smaller (up-split painter (- n 1))))
-      (below (beside smaller smaller) painter))))
+      (below painter (beside smaller smaller)))))
 
 ;; high order procedures below
 
