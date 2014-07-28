@@ -54,16 +54,23 @@
                                   rotate180 flip-vert)))
     (combine4 (corner-split painter n))))
 
-(define (split b1 b2)
-  (define (splitter painter n)
+(define (split proc1 proc2)
+  (lambda (painter n)
     (if (= n 0)
-      painter
-      (let ((smaller (splitter painter (- n 1))))
-        (if (eq? b1 beside)
-          (beside painter (below smaller smaller))
-          (below painter (beside smaller smaller))))))
-;; original: (below (beside smaller smaller) painter)))))
-  splitter)
+        painter
+        (let ((smaller ((split proc1 proc2) painter (- n 1))))
+          (proc1 painter (proc2 smaller smaller))))))
+
+;; (define (split b1 b2)
+;;   (define (splitter painter n)
+;;     (if (= n 0)
+;;       painter
+;;       (let ((smaller (splitter painter (- n 1))))
+;;         (if (eq? b1 beside)
+;;           (beside painter (below smaller smaller))
+;;           (below painter (beside smaller smaller))))))
+;; ;; original: (below (beside smaller smaller) painter)))))
+;;   splitter)
 
 (define (make-vect x y)
   (cons x y))
