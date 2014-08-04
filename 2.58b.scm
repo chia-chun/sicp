@@ -11,12 +11,6 @@
                         (deriv (multiplicand exp) var))
           (make-product (deriv (multiplier exp) var)
                         (multiplicand exp))))
-        ((exponentiation? exp)
-         (make-product (exponent exp)
-                       (make-product
-                        (make-exponentiation (base exp)
-                                             (- (exponent exp) 1))
-                        (deriv (base exp) var))))
         (else (error "unknown expression type - DERIV" exp))))
 
 (define (variable? x) (symbol? x))
@@ -34,10 +28,6 @@
                    (append symbols (list numbers)))))
           ((number? (car items))
            (simplify-sum (cdr items) symbols (+ numbers (car items))))
-          ((sum? (car items))
-           (simplify-sum (cdr items)
-                         (append symbols (cdar items))
-                         numbers))
           (else
            (simplify-sum (cdr items)
                          (append symbols (list (car items)))
@@ -65,10 +55,6 @@
                      (else (append symbols (list numbers))))))
           ((number? (car items))
            (simplify-product (cdr items) symbols (* numbers (car items))))
-          ((product? (car items))
-           (simplify-product (cdr items)
-                             (append symbols (cdar items))
-                             numbers))
           (else
            (simplify-product (cdr items)
                              (append symbols (list (car items)))
@@ -85,23 +71,21 @@
 
 (define (addend s) (car s))
 
-(define (augend s) (caddr s))
+(define (augend s)
+  (if (null? (cdddr s))
+      (caddr s)
+      (cddr s)))
 
 (define (product? x)
-  (and (pair? x) (eq? (cadr x) '*)))
+  (cond ((null? x) #f)
+        ((not (pair? x)) #f)
+        ((eq? (car x) '+) #f)
+        ((eq? (car x) '*) #t)
+        (else (product? (cdr x)))))
 
 (define (multiplier p) (car p))
 
-(define (multiplicand p) (caddr p))
-
-(define (exponentiation? x)
-  (and (pair? x) (eq? (car x) '**)))
-
-(define (base e) (cadr e))
-
-(define (exponent e) (caddr e))
-
-(define (make-exponentiation base exponent)
-  (cond ((or (=number? base 0) (=number? exponent 0)) 0)
-        ((=number? exponent 1) base)
-        (else (list '** base exponent))))
+(define (multiplicand p)
+  (if (null? (cdddr p))
+      (caddr p)
+      (cddr p)))
