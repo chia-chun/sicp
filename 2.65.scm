@@ -1,3 +1,21 @@
+(define (make-tree entry left-branch right-branch)
+  (list entry left-branch right-branch))
+
+(define (entry tree) (car tree))
+
+(define (left-branch tree) (cadr tree))
+
+(define (right-branch tree) (caddr tree))
+
+(define (tree->list tree)
+  (define (copy-to-list tree result-list)
+    (if (null? tree)
+        result-list
+        (copy-to-list (left-branch tree)
+                      (cons (entry tree) (copy-to-list (right-branch tree)
+                                                       result-list)))))
+  (copy-to-list tree '()))
+
 (define (list->tree elements)
   (car (partial-tree elements (length elements))))
 
@@ -15,9 +33,6 @@
                     (remaining-elts (cdr right-result)))
                 (cons (make-tree this-entry left-tree right-tree)
                       remaining-elts))))))))
-
-(define (make-tree entry left-branch right-branch)
-  (list entry left-branch right-branch))
 
 (define (tree-intersection-set tree1 tree2)
   (list->tree (intersection-set (tree->list tree1) (tree->list tree2))))
