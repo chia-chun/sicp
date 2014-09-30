@@ -5,24 +5,19 @@
               (encode (cdr message) tree))))
 
 (define (encode-symbol symbol tree)
-  (let ((dict (tree->dict tree)))
-    (define (lookup symbol dict)
-      (cond ((null? dict) (error "The symbol is not in the tree"))
-            ((equal? symbol (caar dict)) (cadar dict))
-            (else (lookup symbol (cdr dict)))))
-    (lookup symbol dict)))
-
-(define (tree->dict tree);convert a tree to a dictionary
-  (if (leaf? tree)
-      (list (list (symbol-leaf tree) '()))
-      (append (add-bit 0 (tree->dict (left-branch tree)))
-              (add-bit 1 (tree->dict (right-branch tree))))))
-
-(define (add-bit bit dict)
-  (if (null? dict)
-      '()
-      (cons (list (caar dict) (append (list bit) (cadar dict)))
-            (add-bit bit (cdr dict)))))
+  (define (encode-symbol-iter symbol tree result)
+    (if (leaf? tree)
+        result
+        (if (element-of-set? symbol (left-branch tree))
+            (encode-symbol-iter symbol
+                                (left-branch tree)
+                                (append result (0)))
+            (encode-symbol-iter symbol
+                                (right-branch tree)
+                                (append result (1))))))
+  (if (element-of-set? symbol (symbols tree))
+      (encode-symbol-iter symbol tree '())
+      (error "The symbol is not in the tree")))
 
 (define (make-leaf symbol weight)
   (list 'leaf symbol weight))
@@ -69,6 +64,11 @@
   (cond ((= bit 0) (left-branch branch))
         ((= bit 1) (right-branch branch))
         (else (error "bad bit - CHOOSE-BRANCH" bit))))
+
+(define (element-of-set? x set)
+  (cond ((null? set) #f)
+        ((equal? x (car set)) #t)
+        (else (element-of-set? x (cdr set)))))
 
 (define sample-tree
   (make-code-tree (make-leaf 'A 4)
