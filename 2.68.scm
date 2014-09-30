@@ -5,18 +5,16 @@
               (encode (cdr message) tree))))
 
 (define (encode-symbol symbol tree)
-  (define (encode-symbol-iter symbol tree result)
-    (if (leaf? tree)
-        result
-        (if (element-of-set? symbol (left-branch tree))
-            (encode-symbol-iter symbol
-                                (left-branch tree)
-                                (append result (0)))
-            (encode-symbol-iter symbol
-                                (right-branch tree)
-                                (append result (1))))))
+  (define (encode-symbol-true symbol tree)
+    (if (element-of-set? symbol (symbols (left-branch tree)))
+        (if (leaf? tree)
+            '(0)
+            (cons 0 (encode-symbol-true symbol (left-branch tree))))
+        (if (leaf? tree)
+            '(1)
+            (cons 1 (encode-symbol-true symbol (right-branch tree))))))
   (if (element-of-set? symbol (symbols tree))
-      (encode-symbol-iter symbol tree '())
+      (encode-symbol-true symbol tree)
       (error "The symbol is not in the tree")))
 
 (define (make-leaf symbol weight)
