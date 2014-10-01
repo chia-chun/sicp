@@ -2,12 +2,11 @@
   (successive-merge (make-leaf-set pairs)))
 
 (define (successive-merge leaves)
-  (if (null? cddr)
+  (if (null? (cdr leaves))
       leaves
       (successive-merge (adjoin-set (make-code-tree (car leaves)
                                                     (cadr leaves))
                                     (cddr leaves)))))
-
 
 (define (adjoin-set x set)
   (cond ((null? set) (list x))
@@ -22,32 +21,6 @@
         (adjoin-set (make-leaf (car pair)   ;symbol
                                (cadr pair)) ;frequency
                     (make-leaf-set (cdr pairs))))))
-
-(define (encode message tree)
-  (if (null? message)
-      '()
-      (append (encode-symbol (car message) tree)
-              (encode (cdr message) tree))))
-
-(define (encode-symbol symbol tree)
-  (let ((dict (tree->dict tree)))
-    (define (lookup symbol dict)
-      (cond ((null? dict) (error "The symbol is not in the tree"))
-            ((equal? symbol (caar dict)) (cadar dict))
-            (else (lookup symbol (cdr dict)))))
-    (lookup symbol dict)))
-
-(define (tree->dict tree);convert a tree to a dictionary
-  (if (leaf? tree)
-      (list (list (symbol-leaf tree) '()))
-      (append (add-bit 0 (tree->dict (left-branch tree)))
-              (add-bit 1 (tree->dict (right-branch tree))))))
-
-(define (add-bit bit dict)
-  (if (null? dict)
-      '()
-      (cons (list (caar dict) (append (list bit) (cadar dict)))
-            (add-bit bit (cdr dict)))))
 
 (define (make-leaf symbol weight)
   (list 'leaf symbol weight))
