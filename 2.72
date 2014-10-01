@@ -1,0 +1,6 @@
+Most frequent symbol: O(n)
+(Because we still have to search the entire list to make sure it is in the list.)
+
+Least frquent symbol: O(n)
+(Because the symbol would always be the first element in the symbols list.
+ If we have to search the entire list for the symbol, this would be O(n^2).)
