@@ -1,3 +1,30 @@
+(load "put-get.scm")
+
+(define (apply-generic op . args)
+  (let ((type-tags (map type-tag args)))
+    (let ((proc (get op type-tags)))
+      (if proc
+          (apply proc (map contents args))
+          (error "No method for these types - APPLY-GENERIC"
+                 (list op type-tags))))))
+
+(define (deriv exp var)
+  (cond ((number? exp) 0)
+        ((variable? exp) (if (same-variable? exp var) 1 0))
+        (else
+         ((get 'deriv (operator exp))
+          (operands exp)
+          var))))
+
+(define (operator exp) (car exp))
+
+(define (operands exp) (cdr exp))
+
+;; a. This approach used the data-directed approach. The "type-tag" is the + or
+;;    * symbol. The predicates number? and variable? do not have type-tags
+;;    naturally. If we want to include those two predicates, we have to identify
+;;    their types manually.
+
 (define (deriv exp var)
   (cond ((number? exp) 0)
         ((variable? exp)
