@@ -17,7 +17,7 @@
       (error "Bad typed datum -- CONTENTS" datum)))
 
 
-;;; The apply-generic mechanism.  
+;;; The apply-generic mechanism.
 ;;;  Note that we don't deal with coercion here.
 
 (define (apply-generic op . args)
@@ -26,5 +26,4 @@
       (if proc
           (apply proc (map contents args))
           (error "No method for the given types -- APPLY-GENERIC"
-		 (list op type-tags))))))
-
+                 (list op type-tags))))))

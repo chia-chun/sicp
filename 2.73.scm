@@ -1,12 +1,5 @@
 (load "put-get.scm")
-
-(define (apply-generic op . args)
-  (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (error "No method for these types - APPLY-GENERIC"
-                 (list op type-tags))))))
+(load "types.scm")
 
 (define (deriv exp var)
   (cond ((number? exp) 0)
@@ -25,26 +18,57 @@
 ;;    naturally. If we want to include those two predicates, we have to identify
 ;;    their types manually.
 
-(define (deriv exp var)
-  (cond ((number? exp) 0)
-        ((variable? exp)
-         (if (same-variable? exp var) 1 0))
-        ((sum? exp)
-         (make-sum (deriv (addend exp) var)
-                   (deriv (augend exp) var)))
-        ((product? exp)
-         (make-sum
-          (make-product (multiplier exp)
-                        (deriv (multiplicand exp) var))
-          (make-product (deriv (multiplier exp) var)
-                        (multiplicand exp))))
-        ((exponentiation? exp)
-         (make-product (exponent exp)
-                       (make-product
-                        (make-exponentiation (base exp)
-                                             (- (exponent exp) 1))
-                        (deriv (base exp) var))))
-        (else (error "unknown expression type - DERIV" exp))))
+;; b.
+
+(define (sum-deriv items var)
+  (let ((exp (cons '+ items)))
+    (make-sum (deriv (addend exp) var)
+              (deriv (augend exp) var))))
+
+(put 'deriv '+ sum-deriv)
+
+(define (product-deriv items var)
+  (let ((exp (cons '* items)))
+    (make-sum
+     (make-product (multiplier exp)
+                   (deriv (multiplicand exp) var))
+     (make-product (deriv (multiplier exp) var)
+                   (multiplicand exp)))))
+
+(put 'deriv '* product-deriv)
+
+;; c.
+
+(define (exp-deriv items var)
+  (let ((exp (cons '** items)))
+    (make-product (exponent exp)
+                  (make-product
+                   (make-exponentiation (base exp)
+                                        (- (exponent exp) 1))
+                   (deriv (base exp) var)))))
+
+(put 'deriv '** exp-deriv)
+
+;; (define (deriv exp var)
+;;   (cond ((number? exp) 0)
+;;         ((variable? exp)
+;;          (if (same-variable? exp var) 1 0))
+;;         ((sum? exp)
+;;          (make-sum (deriv (addend exp) var)
+;;                    (deriv (augend exp) var)))
+;;         ((product? exp)
+;;          (make-sum
+;;           (make-product (multiplier exp)
+;;                         (deriv (multiplicand exp) var))
+;;           (make-product (deriv (multiplier exp) var)
+;;                         (multiplicand exp))))
+;;         ((exponentiation? exp)
+;;          (make-product (exponent exp)
+;;                        (make-product
+;;                         (make-exponentiation (base exp)
+;;                                              (- (exponent exp) 1))
+;;                         (deriv (base exp) var))))
+;;         (else (error "unknown expression type - DERIV" exp))))
 
 (define (variable? x) (symbol? x))
 
