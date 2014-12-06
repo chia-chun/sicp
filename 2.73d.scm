@@ -35,7 +35,7 @@
      (make-product (deriv (multiplier exp) var)
                    (multiplicand exp)))))
 
-(put '* 'deriv roduct-deriv)
+(put '* 'deriv product-deriv)
 
 ;; c.
 
