@@ -1,0 +1,13 @@
+Data-directed style:
+  Using "intelligent operations"
+  A new type is added -> modify every operation
+  A new operation -> add only the new "intelligent operation"
+
+  Most appropriate for a system in which new operations must often be needed.
+
+Message-passing style:
+  Using "intelligent data objects"
+  A new type is added -> add the new "intelligent data object"
+  A new operation -> modify every type
+
+  Most appropriate for a system in which new types must often be needed.
