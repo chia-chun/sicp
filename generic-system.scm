@@ -1,6 +1,8 @@
 (load "put-get.scm")
 (load "types.scm")
 
+(define (square x) (* x x))
+
 (define (install-rectangular-package)
   ;; internal procedures
   (define (real-part z) (car z))
