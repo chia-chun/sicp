@@ -1,7 +1,7 @@
 (load "generic-system.scm")
 
 (define (attach-tag tag datum)
-  (if (eq? tag 'scheme-number)
+  (if (eqv? tag 'scheme-number)
       datum
       (cons tag datum)))
 
