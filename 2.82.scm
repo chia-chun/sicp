@@ -14,7 +14,7 @@
             (test-coercion type (cdr types))
             #f)))
   (define (test-coercion-get-type types)
-    ;; get the type to which all items in the list "types" can be coareced
+    ;; get the type to which all items in the list "types" can be coarced
     (if (test-coercion (car types) (cdr types))
         (car types)
         (test-coercion (cadr types) (append (car types) (cddr types))))
