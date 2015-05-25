@@ -6,33 +6,29 @@
 (define put-coercion (coercion-table 'insert-proc!))
 
 (define (apply-generic op . args)
-  (define (test-coercion type types)
+  (define (coerce-or-same a b)
+    ;; tests that if a = b or a can be coarced to b
+    (or (eqv? a b) (get-coercion a b)))
+  (define (test-coercion types type)
     ;; tests that if the items in the list "types" can be coarced to "type"
     (if (null? (cdr types))
-        (get-coercion (car types) type)
-        (if (get-coercion (car types) type)
-            (test-coercion type (cdr types))
+        (coerce-or-same (car types) type)
+        (if (coerce-or-same (car types) type)
+            (test-coercion (cdr types) type)
             #f)))
-  (define (test-coercion-get-type types)
+  (define (get-type types)
     ;; get the type to which all items in the list "types" can be coarced
-    (if (test-coercion (car types) (cdr types))
-        (car types)
-        (test-coercion (cadr types) (append (car types) (cddr types))))
+    (define (get-type-iter types items)
+      (if (null? items)
+          #f
+          (if (test-coercion types (car items))
+              (car items)
+              (get-type-iter types (cdr items)))))
+    (let ((items types))
+      (get-type-iter types items)))
 
   (let ((type-tags (map type-tag args)))
-    (let ((proc (get op type-tags)))
-      (if proc
-          (apply proc (map contents args))
-          (let ((type1 (car type-tags))
-                (type2 (cadr type-tags))
-                (a1 (car args))
-                (a2 (cadr args)))
-            (let ((t1->t2 (get-coercion type1 type2))
-                  (t2->t1 (get-coercion type2 type1)))
-              (cond (t1->t2
-                     (apply-generic op (t1->t2 a1) a2))
-                    (t2->t1
-                     (apply-generic op a1 (t2->t1 a2)))
-                    (else
-                     (error "No method for these types"
-                            (list op type-tags)))))))
+    (if (get-type type-tags)
+        ()
+        (error "No method for these types"
+               (list op type-tags)))))
