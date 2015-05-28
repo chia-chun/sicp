@@ -8,7 +8,9 @@
 (define (apply-generic op . args)
   (define (coerce-or-same a b)
     ;; tests that if a = b or a can be coarced to b
-    (or (eqv? a b) (get-coercion a b)))
+    (if (eqv? a b)
+        a
+        (get-coercion a b)))
 
   (define (test-coercion types type)
     ;; tests that if the items in the list "types" can be coarced to "type"
@@ -35,15 +37,41 @@
         (if (null? old)
             new
             (coerce-type-iter (cdr old)
-                              (append (get-coercion (car old) target) new))))
+                              (append (list (coerce-or-same (car old) target))
+                                      new))))
       (coerce-type-iter types '())))
+
+  (define (coerce-content args)
+    (let ((target (get-type (map type-tag args))))
+      (define (transform arg)
+        (if (eqv? (type-tag arg) target)
+            arg
+            ((get-coercion (type-tag arg) target) arg)))
+      (define (coerce-content-iter old new)
+        (if (null? old)
+            new
+            (coerce-content-iter (cdr old)
+                                 (append (list (transform (car old)))
+                                         new))))
+      (coerce-content-iter args '())))
 
   (let ((type-tags (map type-tag args)))
     (if (get-type type-tags)
-        (let ((new-type-tags (coerce-type type-tags)))
-          (apply (get op new-type-tags) (map contents args)))
+        (let ((new-content (coerce-content args)))
+          (apply (get op (map type-tag new-content)) (map contents new-content)))
         (error "No method for these types"
                (list op type-tags)))))
 
 ;; If there is a method to coerce a to b, and another to coerce b to c, but not
 ;; directly a to c, this function cannot use those methods to coerce a to c.
+
+(define (install-coercion-package)
+  (define (scheme-number->complex n)
+    (make-complex-from-real-imag (contents n) 0))
+  (define (scheme-number->rational n)
+    (make-rational (contents n) 1))
+  (put-coercion 'scheme-number 'rational scheme-number->rational)
+  (put-coercion 'scheme-number 'complex scheme-number->complex)
+  'done)
+
+(install-coercion-package)
