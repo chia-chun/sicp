@@ -31,16 +31,6 @@
     (let ((items types))
       (get-type-iter types items)))
 
-  (define (coerce-type types)
-    (let ((target (get-type types)))
-      (define (coerce-type-iter old new)
-        (if (null? old)
-            new
-            (coerce-type-iter (cdr old)
-                              (append (list (coerce-or-same (car old) target))
-                                      new))))
-      (coerce-type-iter types '())))
-
   (define (coerce-content args)
     (let ((target (get-type (map type-tag args))))
       (define (transform arg)
