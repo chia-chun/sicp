@@ -36,7 +36,7 @@
                        (list (type-tag
                               ((get 'raise (list (type-tag arg)))
                                (contents arg)))))
-            (create-raise-table-iter ((get 'raise (type-tag arg))
+            (create-raise-table-iter ((get 'raise (list ((type-tag arg))))
                                       (contents arg)))))))
   (create-raise-table-iter bottom))
 
@@ -47,27 +47,29 @@
 ;; We can still use the apply-generic function defined in 2.82, only with a new
 ;; ger-coercion function.
 
-;; (define (get-coercion a b)
-;;   ;; The new get-coercion is based on raise.
-;;   ;; The output is to repeat raise for n times.
-;;   (define (repeat-raise n)
-;;     (if (= n 0)
-;;         (lambda (x) x)
-;;         (raise (repeat-raise (- n 1)))))
+(define (get-coercion a b)
+  ;; The new get-coercion is based on raise.
+  ;; The output is to repeat raise for n times.
+  (define (repeat-raise n)
+    (if (= n 0)
+        (lambda (x) x)
+        (raise (repeat-raise (- n 1)))))
 
-;;   (define (get-coercion-iter a b n)
-;;     (cond ((eqv? a b) (lambda (x) x))
-;;           ((raise-type a) (get-coercion-iter (raise-type a) b))
-;;           (else #f))))
+  (define (get-coercion-iter a b m)
+    (cond ((eqv? a b) (repeat-raise m))
+          ((get-raise a) (get-coercion-iter (get-raise a) b (+ m 1)))
+          (else #f)))
 
-;; (define (install-coercion-package)
-;;   (define (scheme-number->complex n)
-;;     (make-complex-from-real-imag (contents n) 0))
-;;   (define (scheme-number->rational n)
-;;     (make-rational (contents n) 1))
-;;   (put-coercion 'scheme-number 'rational scheme-number->rational)
-;;   (put-coercion 'scheme-number 'complex scheme-number->complex)
-;;   'done)
+  (get-coercion-iter a b 0))
+
+(define (install-coercion-package)
+  (define (scheme-number->complex n)
+    (make-complex-from-real-imag (contents n) 0))
+  (define (scheme-number->rational n)
+    (make-rational (contents n) 1))
+  (put-coercion 'scheme-number 'rational scheme-number->rational)
+  (put-coercion 'scheme-number 'complex scheme-number->complex)
+  'done)
 
 (define (apply-generic-new op . args)
   (define (coerce-or-same a b)
