@@ -28,17 +28,14 @@
 (define get-raise (raise-table 'lookup-proc))
 (define put-raise (raise-table 'insert-proc!))
 
-(define (create-raise-table bottom)
-  (define (create-raise-table-iter arg)
-    (cond ((get 'raise (list (type-tag arg)))
-           ((put-raise 'raise
-                       (list (type-tag arg))
-                       (list (type-tag
-                              ((get 'raise (list (type-tag arg)))
-                               (contents arg)))))
-            (create-raise-table-iter ((get 'raise (list ((type-tag arg))))
-                                      (contents arg)))))))
-  (create-raise-table-iter bottom))
+(define (create-raise-table arg)
+  (cond ((get 'raise (list (type-tag arg)))
+         (put-raise 'raise
+                    (type-tag arg)
+                    (type-tag ((get 'raise (list (type-tag arg)))
+                               (contents arg))))
+         (create-raise-table ((get 'raise (list (type-tag arg)))
+                              (contents arg))))))
 
 ;; We have to manually enter a bottom number (scheme-number 1 in this case).
 
@@ -53,23 +50,15 @@
   (define (repeat-raise n)
     (if (= n 0)
         (lambda (x) x)
-        (raise (repeat-raise (- n 1)))))
+        (lambda (x) ((repeat-raise (- n 1)) (raise x)))))
 
   (define (get-coercion-iter a b m)
     (cond ((eqv? a b) (repeat-raise m))
-          ((get-raise a) (get-coercion-iter (get-raise a) b (+ m 1)))
+          ((get-raise 'raise a)
+           (get-coercion-iter (get-raise 'raise a) b (+ m 1)))
           (else #f)))
 
   (get-coercion-iter a b 0))
-
-(define (install-coercion-package)
-  (define (scheme-number->complex n)
-    (make-complex-from-real-imag (contents n) 0))
-  (define (scheme-number->rational n)
-    (make-rational (contents n) 1))
-  (put-coercion 'scheme-number 'rational scheme-number->rational)
-  (put-coercion 'scheme-number 'complex scheme-number->complex)
-  'done)
 
 (define (apply-generic-new op . args)
   (define (coerce-or-same a b)
@@ -117,3 +106,8 @@
           (apply (get op (map type-tag new-content)) (map contents new-content)))
         (error "No method for these types"
                (list op type-tags)))))
+;; Example:
+;; scheme@(guile-user)> (apply-generic-new 'add
+;;                                         (make-rational 3 2)
+;;                                         (make-complex-from-real-imag 2 3))
+;; $1 = (complex rectangular 7/2 . 3)
