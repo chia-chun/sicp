@@ -1,11 +1,31 @@
 (load "generic-system.scm")
 
+(define (install-real-package)
+  (define (tag x)
+    (attach-tag 'real x))
+  (put 'add '(real real)
+       (lambda (x y) (tag (+ x y))))
+  (put 'sub '(real real)
+       (lambda (x y) (tag (- x y))))
+  (put 'mul '(real real)
+       (lambda (x y) (tag (* x y))))
+  (put 'div '(real real)
+       (lambda (x y) (tag (/ x y))))
+  (put 'make 'real
+       (lambda (x) (tag x)))
+  'done)
+
+(install-real-package)
+
+(define (make-real n)
+  ((get 'make 'real) n))
+
 (define (install-raise)
   (define (raise-number integer)
     (make-rational integer 1))
 
   (define (raise-rational rational)
-    (attach-tag 'real (/ (car rational) (cdr rational))))
+    (make-real (/ (car rational) (cdr rational))))
 
   (define (raise-real real)
     (make-complex-from-real-imag real 0))
@@ -19,9 +39,66 @@
 
 (define (raise x) (apply-generic 'raise x))
 
-;; The raise function contains only the label of the original type.
-;; My method is to create a new raise-table to contain the labels of both the
-;; original type and the raised type.
+(define (install-project)
+  (define (project-complex complex)
+    (make-real (real-part complex)))
+
+  (define (project-real real)
+    (make-rational (round (numerator real))
+                   (round (denominator real))))
+
+  (define (project-rational rational)
+    (make-scheme-number (round (/ (car rational) (cdr rational)))))
+
+  (put 'project '(rational) project-rational)
+  (put 'project '(real) project-real)
+  (put 'project '(complex) project-complex)
+  'done)
+
+(install-project)
+
+(define (project x) (apply-generic 'project x))
+
+(define (install-=zero?-package)
+  (put '=zero? '(scheme-number)
+       (lambda (x) (= x 0)))
+  (put '=zero? '(rational)
+       (lambda (x) (= (car x) 0)))
+  (put '=zero? '(real)
+       (lambda (x) (= x 0)))
+  (put '=zero? '(complex)
+       (lambda (x) (= (magnitude x) 0)))
+  'done)
+
+(install-=zero?-package)
+
+(define (=zero? x)
+  (apply-generic '=zero? x))
+
+(define (install-equ?-package)
+  (put 'equ? '(scheme-number scheme-number)
+       (lambda (x y) (= x y)))
+  (put 'equ? '(rational rational)
+       (lambda (x y) (= (/ (car x) (cdr x)) (/ (car y) (cdr y)))))
+  (put 'equ? '(real real)
+       (lambda (x y) (= x y)))
+  (put 'equ? '(complex complex)
+       (lambda (x y) (and (= (real-part x) (real-part y))
+                          (= (imag-part x) (imag-part y)))))
+  'done)
+
+(install-equ?-package)
+
+(define (equ? x y)
+  (apply-generic 'equ? x y))
+
+(define (drop x)
+  (if (or (not (pair? x))
+          (eqv? (type-tag x) 'scheme-number))
+      x
+      (if (equ? x (raise (project x)))
+          (drop (project x))
+          x)))
 
 (define raise-table (make-table))
 
@@ -37,12 +114,7 @@
          (create-raise-table ((get 'raise (list (type-tag arg)))
                               (contents arg))))))
 
-;; We have to manually enter a bottom number (scheme-number 1 in this case).
-
 (create-raise-table (make-scheme-number 1))
-
-;; We can still use the apply-generic function defined in 2.82, only with a new
-;; ger-coercion function.
 
 (define (get-coercion a b)
   ;; The new get-coercion is based on raise.
@@ -60,7 +132,7 @@
 
   (get-coercion-iter a b 0))
 
-(define (apply-generic-new op . args)
+(define (apply-generic op . args)
   (define (coerce-or-same a b)
     ;; tests that if a = b or a can be coarced to b
     (if (eqv? a b)
@@ -103,11 +175,11 @@
   (let ((type-tags (map type-tag args)))
     (if (get-type type-tags)
         (let ((new-content (coerce-content args)))
-          (apply (get op (map type-tag new-content)) (map contents new-content)))
-        (error "No method for these types"
+          (if (memv op '(raise project =zero? equ? real-part imag-part))
+              ;; We must exclude operations whose answer should not be "dropped".
+              (apply (get op (map type-tag new-content))
+                     (map contents new-content))
+              (drop (apply (get op (map type-tag new-content))
+                           (map contents new-content)))))
+        (error "No method for the given types -- APPLY-GENERIC"
                (list op type-tags)))))
-;; Example:
-;; scheme@(guile-user)> (apply-generic-new 'add
-;;                                         (make-rational 3 2)
-;;                                         (make-complex-from-real-imag 2 3))
-;; $1 = (complex rectangular 7/2 . 3)
